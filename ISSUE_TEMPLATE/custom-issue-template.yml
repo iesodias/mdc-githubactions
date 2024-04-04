@@ -1,0 +1,19 @@
+name: Solicitação para Criar um Resource Group no Azure
+description: "Essa issue visa criar um resource group na Azure"
+labels: ["Teste"]
+body:
+  - type: input
+    id: rg_name
+    attributes:
+      label: "rg_name"
+      placeholder: "Digite o nome do Resource Group aqui"
+    validations:
+      required: true
+
+  - type: input
+    id: sa_name
+    attributes:
+      label: "sa_name"
+      placeholder: "Digite o nome do AZ aqui"
+    validations:
+      required: true
