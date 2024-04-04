@@ -5,6 +5,8 @@ RUN python -m pip install --upgrade pip
 # switch working directory
 WORKDIR /app
 
+RUN ls -ls
+
 # copy the requirements file into the image
 COPY flash_app/requirements.txt .
 
