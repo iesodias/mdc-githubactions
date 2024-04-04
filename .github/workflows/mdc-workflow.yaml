@@ -36,8 +36,7 @@ jobs:
         files: '["**/*.tfvars"]'
     - name: Terraform Init
       run: |
-        cd manifest/
-        terraform init
+        terraform -chdir=terraform/ init
     - name: Terraform Validate
       run: |
         cd manifest/
