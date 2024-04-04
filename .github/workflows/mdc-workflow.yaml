@@ -1,51 +1,26 @@
-name: Mdc Workflow
+name: MDC Mixed inputs
 
 on:
-  push:
-    branches:
-      - develop
-      - homol
-      - master
-      - 'feature/**'  # Gatilho para qualquer branch que comece com "feature/"
+  workflow_dispatch:
+    inputs:
+      name:
+        type: choice
+        description: Who to greet
+        options: 
+        - Mentoria Azure
+        - Mentoria Devops Cloud
+      message:
+        required: true
+      use-emoji:
+        type: boolean
+        description: Include 🎉🤣 emojis
+      environment:
+        type: environment
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout do Código
-        uses: actions/checkout@v2
-
-  dev:
-    needs: build
+  greet:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Fase de Desenvolvimento
-        run: echo "Executando deploy de DEV"
-
-  qa:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Fase de Qualidade
-        run: echo "Executando deploy de QA"
-
-  hml:
-    needs:
-      - dev
-      - qa
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Fase de Homologação
-        run: echo "Executando deploy de HML"
-
-  prd:
-    needs: hml
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Fase de Produção
-        run: echo "Executando deploy de PRD"
+    - name: Send greeting
+      run: echo "${{ github.event.inputs.message }} ${{ fromJSON('["", "🥳"]')[github.event.inputs.use-emoji == 'true'] }} ${{ github.event.inputs.name }}"
