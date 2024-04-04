@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 RUN ls -la
-
+RUN cd flask_app
 RUN pip install -r requirements.txt
 
 ENTRYPOINT [ "python" ]
