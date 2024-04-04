@@ -1,1 +1,17 @@
 name: Mdc Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v2
+
+      - name: Mostrar Mensagem
+        run: echo "Olá, MDC, GitHub Actions!"
