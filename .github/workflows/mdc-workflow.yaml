@@ -8,10 +8,42 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout do Código
         uses: actions/checkout@v2
 
-      - name: Mostrar Mensagem
-        run: echo "Olá, MDC, GitHub Actions!"
+  dev:
+    needs: build  # O estágio de desenvolvimento depende do estágio de build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fase de Desenvolvimento
+        run: echo "Executando deploy de DEV"
+
+  qa:
+    needs: build  # O estágio de qualidade depende do estágio de build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fase de Qualidade
+        run: echo "Executando deploy de QA"
+
+  homologacao:
+    needs:
+      - dev  # O estágio de homologação depende dos estágios de desenvolvimento e qualidade
+      - qa
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fase de Homologação
+        run: echo "Executando deploy de HML"
+
+  producao:
+    needs: homologacao  # O estágio de produção depende do estágio de homologação
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fase de Produção
+        run: echo "Executando deploy de PRD"
