@@ -27,6 +27,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: flask-app/app/Dockerfile
+          file: flask_app/app/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/mdc:latest
