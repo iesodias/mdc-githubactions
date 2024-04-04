@@ -1,4 +1,8 @@
 name: 'terraform-deploy'
+
+env:
+  ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
+
 on: 
   push:
     branches: [ "none" ]
