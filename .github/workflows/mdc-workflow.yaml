@@ -1,4 +1,8 @@
 name: 'terraform-deploy'
+
+env:
+  ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
+
 on: 
   push:
     branches: [ "none" ]
@@ -18,19 +22,13 @@ jobs:
   TerraformApply:
     name: 'TerraformApply'
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     steps:
-
-    - name: Login via Az module
-      uses: azure/login@v1
+    - name: Checkout
+      uses: actions/checkout@v3
+    - uses: azure/login@v1
       with:
         creds: ${{secrets.AZURE_CREDENTIALS}}
         enable-AzPSSession: true 
-
-    - name: Checkout
-      uses: actions/checkout@v3
     - uses: cschleiden/replace-tokens@v1
       with:
         tokenPrefix: '#{'
@@ -38,15 +36,17 @@ jobs:
         files: '["**/*.tfvars"]'
     - name: Terraform Init
       run: |
-        terraform -chdir=manifest/ init
+        cd manifest/
+        terraform init
     - name: Terraform Validate
-      run: terraform -chdir=manifest/ validate -no-color
+      run: |
+        cd manifest/
+        terraform validate -no-color
     - name: Terraform Plan
-      run: terraform -chdir=manifest/ plan -var-file=var.tfvars -no-color -input=false
-      continue-on-error: true
-    - name: Terraform Plan Status
-      if: steps.plan.outcome == 'failure'
-      run: exit 1
+      run: |
+        cd manifest/
+        terraform plan -var-file=var.tfvars -no-color -input=false
     - name: Terraform Apply
-      run: terraform -chdir=manifest/ apply -var-file=var.tfvars -auto-approve -no-color -input=false
-      continue-on-error: true
+      run: |
+        cd manifest/
+        terraform apply -var-file=var.tfvars -auto-approve -no-color -input=false
