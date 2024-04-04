@@ -1,23 +1,45 @@
-name: Run Azure Login with OpenID Connect
-on: [push]
+name: 'terraform-deploy'
+on: 
+  push:
+    branches: [ "none" ]
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'StorageAccount Name'
+        required: true
+        default: ''
+      destroyTerraform:
+        description: 'Destroy Terraform'
+        required: true
+        default: false
+        type: boolean 
 
-permissions:
-      id-token: write
-      contents: read
-      
-jobs: 
-  execute-remote-az-cli:
+jobs:
+  TerraformApply:
+    name: 'TerraformApply'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
-    
-    - name: Login via Az module
-      uses: azure/login@v1
+    - name: Checkout
+      uses: actions/checkout@v3
+    - uses: cschleiden/replace-tokens@v1
       with:
-        creds: ${{secrets.AZURE_CREDENTIALS}}
-        enable-AzPSSession: true 
-  
-    - name: 'Run Azure CLI commands'
+        tokenPrefix: '#{'
+        tokenSuffix: '}#'
+        files: '["**/*.tfvars"]'
+    - name: Terraform Init
       run: |
-          az account show
-          az group list
-          pwd
+        terraform -chdir=manifest/ init
+    - name: Terraform Validate
+      run: terraform -chdir=manifest/ validate -no-color
+    - name: Terraform Plan
+      run: terraform -chdir=manifest/ plan -var-file=var.tfvars -no-color -input=false
+      continue-on-error: true
+    - name: Terraform Plan Status
+      if: steps.plan.outcome == 'failure'
+      run: exit 1
+    - name: Terraform Apply
+      run: terraform -chdir=manifest/ apply -var-file=var.tfvars -auto-approve -no-color -input=false
+      continue-on-error: true
