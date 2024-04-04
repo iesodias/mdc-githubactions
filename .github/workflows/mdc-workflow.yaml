@@ -1,46 +1,52 @@
-name: Mdc Workflow
-
-on:
-  workflow_dispatch:  # Gatilho manual
+name: 'terraform-deploy'
+on: 
+  push:
+    branches: [ "none" ]
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'StorageAccount Name'
+        required: true
+        default: ''
+      destroyTerraform:
+        description: 'Destroy Terraform'
+        required: true
+        default: false
+        type: boolean 
 
 jobs:
-  build:
+  TerraformApply:
+    name: 'TerraformApply'
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        shell: bash
     steps:
-      - name: Checkout do Código
-        uses: actions/checkout@v2
 
-  dev:
-    needs: build  # O estágio de desenvolvimento depende do estágio de build
-    runs-on: ubuntu-latest
+    - name: Login via Az module
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+        enable-AzPSSession: true 
 
-    steps:
-      - name: Fase de Desenvolvimento
-        run: echo "Executando deploy de DEV"
-
-  qa:
-    needs: build  # O estágio de qualidade depende do estágio de build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Fase de Qualidade
-        run: echo "Executando deploy de QA"
-
-  hml:
-    needs:
-      - dev  # O estágio de homologação depende do estágio de desenvolvimento
-      - qa   # e também do estágio de qualidade
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Fase de Homologação
-        run: echo "Executando deploy de HML"
-
-  prd:
-    needs: hml  # O estágio de produção depende do estágio de homologação
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Fase de Produção
-        run: echo "Executando deploy de PRD"
+    - name: Checkout
+      uses: actions/checkout@v3
+    - uses: cschleiden/replace-tokens@v1
+      with:
+        tokenPrefix: '#{'
+        tokenSuffix: '}#'
+        files: '["**/*.tfvars"]'
+    - name: Terraform Init
+      run: |
+        terraform -chdir=manifest/ init
+    - name: Terraform Validate
+      run: terraform -chdir=manifest/ validate -no-color
+    - name: Terraform Plan
+      run: terraform -chdir=manifest/ plan -var-file=var.tfvars -no-color -input=false
+      continue-on-error: true
+    - name: Terraform Plan Status
+      if: steps.plan.outcome == 'failure'
+      run: exit 1
+    - name: Terraform Apply
+      run: terraform -chdir=manifest/ apply -var-file=var.tfvars -auto-approve -no-color -input=false
+      continue-on-error: true
