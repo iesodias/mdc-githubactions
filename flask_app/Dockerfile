@@ -5,9 +5,9 @@ RUN python -m pip install --upgrade pip
 
 WORKDIR /app
 
-RUN ls -la
-
 COPY . .
+
+RUN ls -la
 
 RUN pip install -r requirements.txt
 
