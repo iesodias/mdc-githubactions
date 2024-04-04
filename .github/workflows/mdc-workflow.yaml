@@ -1,7 +1,12 @@
 name: Mdc Workflow
 
 on:
-  workflow_dispatch:  # Gatilho manual
+  push:
+    branches:
+      - develop
+      - homol
+      - master
+      - 'feature/**'  # Gatilho para qualquer branch que comece com "feature/"
 
 jobs:
   build:
@@ -12,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
 
   dev:
-    needs: build  # O estágio de desenvolvimento depende do estágio de build
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +25,7 @@ jobs:
         run: echo "Executando deploy de DEV"
 
   qa:
-    needs: build  # O estágio de qualidade depende do estágio de build
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -29,8 +34,8 @@ jobs:
 
   hml:
     needs:
-      - dev  # O estágio de homologação depende do estágio de desenvolvimento
-      - qa   # e também do estágio de qualidade
+      - dev
+      - qa
     runs-on: ubuntu-latest
 
     steps:
@@ -38,7 +43,7 @@ jobs:
         run: echo "Executando deploy de HML"
 
   prd:
-    needs: hml  # O estágio de produção depende do estágio de homologação
+    needs: hml
     runs-on: ubuntu-latest
 
     steps:
