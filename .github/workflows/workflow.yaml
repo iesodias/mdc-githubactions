@@ -1,4 +1,4 @@
-name: MDC Workflow
+name: Mdc Workflow
 
 on:
   push:
@@ -8,22 +8,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout do Código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
   dev:
     needs: build
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Fase de Desenvolvimento
-        run: echo "Executando deploy em Dev"
+        run: echo "Executando deploy de DEV"
 
   qa:
     needs: build
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Fase de Qualidade
