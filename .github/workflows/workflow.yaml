@@ -1,24 +1,51 @@
-name: Run Azure Login with OpenID Connect
-on: [push]
+name: 'terraform-deploy'
 
-permissions:
-      id-token: write
-      contents: read
+env:
+  ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
+  TF_VAR_STORAGE_ACCOUNT_NAME: ${{ github.event.inputs.name}}
 
-jobs: 
-  execute-remote-az-cli:
+on: 
+  push:
+    branches: [ "none" ]
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'StorageAccount Name'
+        required: true
+        default: ''
+      destroyTerraform:
+        description: 'Destroy Terraform'
+        required: true
+        default: false
+        type: boolean 
+
+jobs:
+  TerraformApply:
+    name: 'TerraformApply'
+    env:
+      TF_VAR_STORAGE_ACCOUNT_NAME: ${{ github.event.inputs.name}}
     runs-on: ubuntu-latest
     steps:
-    
-    - name: Login via Az module
-      uses: azure/login@v1
+    - name: Checkout
+      uses: actions/checkout@v3
+    - uses: azure/login@v1
       with:
         creds: ${{secrets.AZURE_CREDENTIALS}}
         enable-AzPSSession: true 
-  
-    - name: 'Run Azure CLI commands'
+    - uses: cschleiden/replace-tokens@v1
+      with:
+        tokenPrefix: '#{'
+        tokenSuffix: '}#'
+        files: '["**/*.tfvars"]'
+    - name: Terraform Init
       run: |
-          az account show
-          az group list
-          pwd
-          az group delete --name iesofdias-rg --yes --no-wait
+        terraform -chdir=manifest/ init
+    - name: Terraform Validate
+      run: |
+        terraform -chdir=manifest/ validate -no-color
+    - name: Terraform Plan
+      run: |
+        terraform -chdir=manifest/ plan -var-file=var.tfvars -no-color -input=false
+    - name: Terraform Apply
+      run: |
+        terraform -chdir=manifest/ apply -var-file=var.tfvars -auto-approve -no-color -input=false
