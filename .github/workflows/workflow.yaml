@@ -1,12 +1,13 @@
 name: Mdc Workflow
 
-# on:
-#   push:
-#     branches:
-#       - main
-
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - develop
+      - homol
+      - master
+      - 'feature/**'
+
 
 jobs:
   build:
