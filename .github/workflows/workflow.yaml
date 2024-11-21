@@ -1,26 +1,24 @@
-name: MDC Mixed inputs
+name: Runner Selection Workflow
 
 on:
   workflow_dispatch:
     inputs:
-      name:
-        type: choice
-        description: Who to greet
-        options: 
-        - Mentoria Azure
-        - Mentoria Devops Cloud
-      message:
+      runner:
+        description: 'Choose the runner for the job'
         required: true
-      use-emoji:
-        type: boolean
-        description: Include 🎉🤣 emojis
-      environment:
-        type: environment
+        type: choice
+        default: 'ubuntu-latest'
+        options:
+          - 'ubuntu-latest'
+          - 'macos-latest'
 
 jobs:
-  greet:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: ${{ inputs.runner }}
 
     steps:
-    - name: Send greeting
-      run: echo "${{ github.event.inputs.message }} ${{ fromJSON('["", "🥳"]')[github.event.inputs.use-emoji == 'true'] }} ${{ github.event.inputs.name }}"
+      - name: Checkout do Código
+        uses: actions/checkout@v2
+
+      - name: Executando no Runner
+        run: echo "Executando um Deploy usando um runner no input"
