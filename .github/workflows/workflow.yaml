@@ -3,6 +3,7 @@ name: 'terraform-deploy'
 env:
   ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
   TF_VAR_STORAGE_ACCOUNT_NAME: ${{ github.event.inputs.name}}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID}}
 
 on: 
   push:
