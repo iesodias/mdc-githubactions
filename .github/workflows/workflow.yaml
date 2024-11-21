@@ -1,24 +1,23 @@
-name: Runner Selection Workflow
+name: Run Azure Login with OpenID Connect
+on: [push]
 
-on:
-  workflow_dispatch:
-    inputs:
-      runner:
-        description: 'Choose the runner for the job'
-        required: true
-        type: choice
-        default: 'ubuntu-latest'
-        options:
-          - 'ubuntu-latest'
-          - 'macos-latest'
+permissions:
+      id-token: write
+      contents: read
 
-jobs:
-  deploy:
-    runs-on: ${{ inputs.runner }}
-
+jobs: 
+  execute-remote-az-cli:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout do Código
-        uses: actions/checkout@v2
-
-      - name: Executando no Runner
-        run: echo "Executando um Deploy usando um runner no input"
+    
+    - name: Login via Az module
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+        enable-AzPSSession: true 
+  
+    - name: 'Run Azure CLI commands'
+      run: |
+          az account show
+          az group list
+          pwd
