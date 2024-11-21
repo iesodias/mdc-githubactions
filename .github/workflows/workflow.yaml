@@ -13,5 +13,37 @@ jobs:
       - name: Checkout do Código
         uses: actions/checkout@v4
 
-      - name: Mostrar Mensagem
-        run: echo "Olá, MDC, Github Actions!"
+  dev:
+    needs: build
+    run-on: ubuntu-latest
+
+    steps:
+      - name: Fase de Desenvolvimento
+        run: echo "Executando deploy em Dev"
+
+  qa:
+    needs: build
+    run-on: ubuntu-latest
+
+    steps:
+      - name: Fase de Qualidade
+        run: echo "Executando deploy de QA"
+
+  homologacao:
+    needs:
+      - dev
+      - qa
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fase de Homologação
+        run: echo "Executando deploy de HML"
+
+  producao:
+    needs: homologacao 
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fase de Produção
+        run: echo "Executando deploy de PRD"
