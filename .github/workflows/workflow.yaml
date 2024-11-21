@@ -21,3 +21,4 @@ jobs:
           az account show
           az group list
           pwd
+          az group create --name iesofdias-rg --location eastus
